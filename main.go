@@ -1,11 +1,28 @@
 /*
-Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-
+Copyright © 2025 Dave M. Giglio dave.m.giglio@gmail.com
 */
 package main
 
-import "chat-tree/cmd"
+import (
+	"os"
+	"fmt"
+	"chat-tree/cmd"
+	"chat-tree/internal/chatgpt"
+)
 
 func main() {
-	cmd.Execute()
+	if len(os.Args) < 2 {
+		fmt.Println("Usage: chat-tree <command> [options]")
+		os.Exit(1)
+	}
+
+	switch os.Args[1] {
+	case "openai":
+		chatgpt.RunFromCLI(os.Args[2:])
+	case "document":
+		cmd.Execute(os.Args[2:])
+	default:
+		fmt.Printf("Unknown command: %s\n", os.Args[1])
+		os.Exit(1)
+	}
 }
