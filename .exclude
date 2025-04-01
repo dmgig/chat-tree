@@ -1,5 +1,11 @@
 .exclude
-.git
-.env
 
+.git/**
+.gitignore
+.vscode/**
+
+.env
+output/**
+
+LICENSE
 test/exclude.txt

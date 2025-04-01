@@ -1,3 +1,4 @@
+.vscode
 .env
-.chat-tree/*
-!.chat-tree/.gitkeep
+output/*
+!output/.gitkeep
