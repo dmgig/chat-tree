@@ -22,6 +22,8 @@ func main() {
 		document.CreateDocumentation(os.Args[2:])
 	case "list":
 		list.ListFiles(os.Args[2:])
+	case "list-models":
+		list.ListModels()
 	default:
 		fmt.Printf("Unknown command: %s\n", os.Args[1])
 		os.Exit(1)

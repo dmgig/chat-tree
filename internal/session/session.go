@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	chatgpt "chat-tree/internal/chatgpt"
 )
 
 type FileInfo struct {
@@ -32,6 +34,22 @@ func Save(files []FileInfo) (string, error) {
 			"Explain the following file in detail, including what each function does and how it fits into the program:\n\n%s",
 			string(content),
 		)
+
+		model := os.Getenv("OPENAI_MODEL")
+		if model == "" {
+			model = "gpt-3.5-turbo" // fallback
+		}
+
+		tokenCount, err := chatgpt.CountTokens(model, prompt)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error counting tokens for %s: %v\n", file.Path, err)
+			tokenCount = -1
+		}
+
+		maxTokens, err := chatgpt.MaxTokensForModel(model)
+		if err == nil && tokenCount > maxTokens {
+			fmt.Fprintf(os.Stderr, "WARNING: %s exceeds token limit (%d > %d). Consider splitting.\n", file.Path, tokenCount, maxTokens)
+		}
 
 		promptPath := filepath.Join(sessionDir, fmt.Sprintf("%05d_prompt.txt", i))
 		responsePath := filepath.Join(sessionDir, fmt.Sprintf("%05d_response.txt", i))
