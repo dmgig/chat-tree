@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"chat-tree/internal/chatgpt"
 	"chat-tree/internal/session"
 	"chat-tree/internal/walker"
 )
@@ -38,19 +37,8 @@ func CreateDocumentation(args []string) {
 		return
 	}
 
-	sessionDir, err := session.Save(files)
-	if err != nil {
+	if _, err := session.Save(files); err != nil {
 		fmt.Println("Failed to write session:", err)
-		os.Exit(1)
-	}
-
-	client := chatgpt.NewChatClient()
-
-	fmt.Println("Calling OpenAI with sessionDir:", sessionDir)
-	err = client.ProcessSession(sessionDir)
-
-	if err != nil {
-		fmt.Println("Failed to process session with OpenAI:", err)
 		os.Exit(1)
 	}
 
