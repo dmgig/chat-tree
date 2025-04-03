@@ -32,6 +32,7 @@ const (
 		"- The full documentation that was previously generated\n" +
 		"- A list of files that were used\n\n" +
 		"Review the documentation for accuracy, completeness, and clarity. If something seems wrong, unclear, or missing, revise it. Otherwise, you may return the same result.\n\n" +
+		"Recall that the specific purpose is for any user to come along and find the list of possible cli commands and run then.\n\n" +
 		"You may request specific files by name if needed, and they will be provided in follow-up messages. However, try to work with the files listed unless essential."
 	DefaultModel = "gpt-4-turbo"
 )
