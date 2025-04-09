@@ -47,6 +47,9 @@ func loadExcludeFile(dir string) []string {
 		}
 		patterns = append(patterns, line)
 	}
+
+	fmt.Fprintln(os.Stderr, patterns)
+
 	return patterns
 }
 
@@ -59,13 +62,15 @@ func WalkFiles(paths []string, cliExcludePatterns []string) ([]session.FileInfo,
 		projectRoot = "." // fallback
 	}
 
-	// Combine CLI and .exclude patterns
+	// Load .exclude from project root
 	allExcludePatterns := append([]string{}, cliExcludePatterns...)
 	allExcludePatterns = append(allExcludePatterns, loadExcludeFile(projectRoot)...)
 
 	for _, basePath := range paths {
+		baseAbs, _ := filepath.Abs(basePath) // capture the base path for relative matching
+
 		err := filepath.Walk(basePath, func(path string, info os.FileInfo, err error) error {
-			return handlePath(path, info, err, projectRoot, allExcludePatterns, &results)
+			return handlePath(path, info, err, baseAbs, allExcludePatterns, &results)
 		})
 
 		if err != nil {
@@ -76,27 +81,29 @@ func WalkFiles(paths []string, cliExcludePatterns []string) ([]session.FileInfo,
 	return results, nil
 }
 
-func handlePath(path string, info os.FileInfo, err error, projectRoot string, excludePatterns []string, results *[]session.FileInfo) error {
-
+func handlePath(path string, info os.FileInfo, err error, baseAbs string, excludePatterns []string, results *[]session.FileInfo) error {
 	if err != nil {
 		return nil
 	}
 
-	absProjectRoot, _ := filepath.Abs(projectRoot)
 	absPath, _ := filepath.Abs(path)
-	relPath, err := filepath.Rel(absProjectRoot, absPath)
+	relPath, err := filepath.Rel(baseAbs, absPath)
 	if err != nil {
 		return nil
 	}
 	relPath = filepath.ToSlash(relPath)
 
+	// Skip "." to avoid matching against itself
+	if relPath == "." {
+		return nil
+	}
+
 	// Directories
 	if info.IsDir() {
-		dirPath := relPath + "/"
 		for _, pattern := range excludePatterns {
-			match, err := ds.Match(pattern, dirPath)
+			match, err := ds.Match(pattern, relPath)
 			if err == nil && match {
-				fmt.Printf("Skipping directory: %s (matched %s)\n", dirPath, pattern)
+				fmt.Printf("Skipping directory: %s (matched %s)\n", relPath, pattern)
 				return filepath.SkipDir
 			}
 		}

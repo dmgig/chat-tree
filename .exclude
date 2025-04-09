@@ -9,3 +9,7 @@ output/**
 
 LICENSE
 test/exclude.txt
+
+package.lock
+node_modules/
+node_modules/**
